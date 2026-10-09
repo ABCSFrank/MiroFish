@@ -1,0 +1,32 @@
+{
+  "name": "MiroFish",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+  // torch + sentence-transformers need real RAM; this is the free 2-core / 8 GB machine
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "containerEnv": {
+    // Frontend calls same-origin /api/* (Vite proxies it to Flask on :5001)
+    // instead of http://localhost:5001, which the browser can't reach.
+    "VITE_API_BASE_URL": "/",
+    // Let Vite's dev server accept requests from the Codespaces forwarded URL.
+    "__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS": ".app.github.dev",
+    // Groq (OpenAI-compatible)
+    "LLM_BASE_URL": "https://api.groq.com/openai/v1",
+    "LLM_MODEL_NAME": "llama-3.3-70b-versatile",
+    "OASIS_DEFAULT_MAX_ROUNDS": "5"
+  },
+  // Codespaces will prompt for these when the codespace is created
+  "secrets": {
+    "LLM_API_KEY": { "description": "Groq API key (gsk_...)", "documentationUrl": "https://console.groq.com/keys" },
+    "ZEP_API_KEY": { "description": "Zep Cloud API key", "documentationUrl": "https://app.getzep.com" }
+  },
+  "postCreateCommand": "pipx install uv && npm run setup:all",
+  "postAttachCommand": "npm run dev",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "MiroFish", "onAutoForward": "openBrowser" },
+    "5001": { "label": "MiroFish API", "onAutoForward": "silent" }
+  }
+}
